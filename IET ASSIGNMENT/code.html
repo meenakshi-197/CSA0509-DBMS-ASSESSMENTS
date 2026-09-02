@@ -1,0 +1,1644 @@
+<!--
+INSTRUCTIONS TO RUN THE PROJECT
+
+1. Save this file as code.html.
+2. Open the file location.
+3. Double-click code.html.
+4. The project will open in Google Chrome or any web browser.
+5. No compilation or installation is required.
+6. If the file does not open in a browser, right-click the file and select "Open with → Google Chrome".
+
+PROJECT FILE: code.html
+INPUT:
+1. Connection ID and Consumer Name
+   - Entered when adding a new water connection.
+
+2. Zone and Connection Type
+   - Select the consumer's zone and type.
+
+3. Meter Reading Data
+   - Connection ID, Meter ID, timestamp and
+     consumption units are displayed/stored.
+
+4. Payment Details
+   - Enter Bill ID, payment amount and payment mode
+     (UPI, Card, Cash or Net Banking).
+
+5. Complaint Details
+   - Enter Connection ID, complaint type and
+     complaint description.
+
+6. Search Input
+   - Enter Connection ID or Consumer Name to search
+     the respective records.
+
+OUTPUT:
+1. Dashboard
+   - Displays total connections, meter readings,
+     pending bills and open complaints.
+
+2. Connection Management
+   - Displays all registered consumers and their
+     connection details.
+
+3. Meter Readings
+   - Displays meter readings and consumption units.
+
+4. Billing Management
+   - Displays bill ID, connection ID, amount,
+     due date and payment status.
+
+5. Payment Management
+   - Displays successfully recorded payments.
+
+6. Complaint Management
+   - Displays registered complaints and their status.
+
+7. Leak Detection
+   - Detects high water consumption above the
+     threshold and displays a warning alert.
+
+8. Search Results
+   - Displays only the records matching the
+     entered search text.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Water Utility Management System</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#e8f8ff,#f7f4ff);
+    color:#222;
+}
+
+/* HEADER */
+
+header{
+    background:linear-gradient(135deg,#0077b6,#00b4d8,#48cae4);
+    color:white;
+    padding:16px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+
+header h1{
+    font-size:23px;
+}
+
+header p{
+    font-size:13px;
+    margin-top:5px;
+}
+
+/* ADMIN PROFILE */
+
+.admin-profile{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255,255,255,.18);
+    padding:7px 14px 7px 7px;
+    border-radius:30px;
+}
+
+.profile-img{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:25px;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);
+}
+
+.admin-text{
+    font-weight:bold;
+    font-size:15px;
+}
+
+/* MAIN CONTAINER */
+
+.container{
+    display:flex;
+    min-height:calc(100vh - 70px);
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:235px;
+    background:linear-gradient(180deg,#ffffff,#eefaff);
+    border-right:1px solid #d5e8ef;
+    padding-top:20px;
+    box-shadow:3px 0 10px rgba(0,0,0,.05);
+}
+
+.sidebar button{
+    width:100%;
+    border:none;
+    background:transparent;
+    text-align:left;
+    padding:15px 25px;
+    font-size:15px;
+    cursor:pointer;
+    color:#164e63;
+    transition:.3s;
+}
+
+.sidebar button:hover{
+    background:#dff7ff;
+    padding-left:32px;
+    color:#0077b6;
+}
+
+.sidebar button.active{
+    background:linear-gradient(90deg,#0077b6,#00b4d8);
+    color:white;
+    border-radius:0 25px 25px 0;
+    box-shadow:0 4px 10px rgba(0,119,182,.25);
+}
+
+/* MAIN */
+
+.main{
+    flex:1;
+    padding:28px;
+}
+
+.page{
+    display:none;
+}
+
+.page.active{
+    display:block;
+    animation:fadeIn .3s ease;
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(8px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.page h2{
+    color:#0077b6;
+    margin-bottom:20px;
+    font-size:25px;
+}
+
+/* DASHBOARD CARDS */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,.09);
+    border-top:5px solid #00b4d8;
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 8px 18px rgba(0,0,0,.13);
+}
+
+.card h3{
+    font-size:14px;
+    color:#666;
+    margin-bottom:10px;
+}
+
+.card .number{
+    font-size:29px;
+    color:#0077b6;
+    font-weight:bold;
+}
+
+.card small{
+    color:#777;
+}
+
+/* DIFFERENT CARD COLORS */
+
+.cards .card:nth-child(1){
+    border-top-color:#0077b6;
+}
+
+.cards .card:nth-child(2){
+    border-top-color:#00b4d8;
+}
+
+.cards .card:nth-child(3){
+    border-top-color:#f4a261;
+}
+
+.cards .card:nth-child(4){
+    border-top-color:#e63946;
+}
+
+/* TABLE */
+
+.table-box{
+    background:white;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    padding:20px;
+    overflow-x:auto;
+}
+
+.table-box h3{
+    margin-bottom:15px;
+    color:#164e63;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:linear-gradient(90deg,#0077b6,#00b4d8);
+    color:white;
+    padding:13px;
+    text-align:left;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #e1edf1;
+}
+
+tr:hover{
+    background:#f0fbff;
+}
+
+/* SEARCH */
+
+.search{
+    margin-bottom:15px;
+    display:flex;
+    gap:10px;
+}
+
+.search input,
+.search select{
+    padding:11px;
+    border:1px solid #b8d9e5;
+    border-radius:7px;
+    outline:none;
+}
+
+.search input:focus{
+    border-color:#00b4d8;
+    box-shadow:0 0 5px rgba(0,180,216,.3);
+}
+
+.search input{
+    width:260px;
+}
+
+/* BUTTON */
+
+.primary-btn{
+    background:linear-gradient(90deg,#0077b6,#00b4d8);
+    color:white;
+    border:none;
+    padding:11px 18px;
+    border-radius:7px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.primary-btn:hover{
+    background:linear-gradient(90deg,#005f8f,#0096c7);
+    transform:translateY(-2px);
+    box-shadow:0 4px 10px rgba(0,119,182,.25);
+}
+
+/* FORM */
+
+.form-box{
+    background:white;
+    padding:22px;
+    border-radius:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    margin-bottom:25px;
+    border-left:5px solid #00b4d8;
+}
+
+.form-box h3{
+    color:#164e63;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:15px;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea{
+    width:100%;
+    padding:11px;
+    border:1px solid #b8d9e5;
+    border-radius:7px;
+    outline:none;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus{
+    border-color:#00b4d8;
+    box-shadow:0 0 5px rgba(0,180,216,.25);
+}
+
+.form-grid textarea{
+    min-height:80px;
+}
+
+/* STATUS */
+
+.status{
+    padding:6px 11px;
+    border-radius:15px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.active-status{
+    background:#d9f6e5;
+    color:#147239;
+}
+
+.pending{
+    background:#fff0c2;
+    color:#8a6500;
+}
+
+.paid{
+    background:#d9f6e5;
+    color:#147239;
+}
+
+.open{
+    background:#ffd9d9;
+    color:#a30000;
+}
+
+.resolved{
+    background:#d9f6e5;
+    color:#147239;
+}
+
+/* LEAK ALERT */
+
+.alert-box{
+    background:white;
+    border-left:6px solid #e63946;
+    padding:20px 25px;
+    margin-bottom:12px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,.07);
+    max-width:650px;
+}
+
+.alert-title{
+    color:#d62828;
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:18px;
+    padding-bottom:12px;
+    border-bottom:1px solid #eeeeee;
+}
+
+.alert-details{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.detail-row{
+    display:grid;
+    grid-template-columns:160px 1fr;
+    align-items:center;
+    padding:8px 0;
+}
+
+.detail-label{
+    color:#666;
+    font-weight:bold;
+}
+
+.detail-value{
+    color:#222;
+    font-weight:bold;
+}
+
+/* FOOTER */
+
+footer{
+    text-align:center;
+    background:linear-gradient(90deg,#0077b6,#00b4d8);
+    color:white;
+    padding:13px;
+    font-size:13px;
+}
+
+/* MOBILE */
+
+@media(max-width:800px){
+
+    .container{
+        display:block;
+    }
+
+    .sidebar{
+        width:100%;
+        display:flex;
+        overflow-x:auto;
+    }
+
+    .sidebar button{
+        min-width:150px;
+        text-align:center;
+    }
+
+    header h1{
+        font-size:17px;
+    }
+
+    .admin-text{
+        display:none;
+    }
+
+    .detail-row{
+        grid-template-columns:130px 1fr;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header>
+
+<div>
+<h1>💧 Smart Water Utility Management System</h1>
+<p>Consumption • Billing • Payment • Complaint Management</p>
+</div>
+
+<div class="admin-profile">
+
+<div class="profile-img">👨🏻</div>
+
+<div class="admin-text">
+Admin
+</div>
+
+</div>
+
+</header>
+
+
+<!-- MAIN CONTAINER -->
+
+<div class="container">
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<button class="nav active"
+onclick="showPage('dashboard',this)">
+📊 Dashboard
+</button>
+
+<button class="nav"
+onclick="showPage('connections',this)">
+🔗 Connections
+</button>
+
+<button class="nav"
+onclick="showPage('readings',this)">
+💧 Meter Readings
+</button>
+
+<button class="nav"
+onclick="showPage('bills',this)">
+🧾 Bills
+</button>
+
+<button class="nav"
+onclick="showPage('payments',this)">
+💳 Payments
+</button>
+
+<button class="nav"
+onclick="showPage('complaints',this)">
+📢 Complaints
+</button>
+
+<button class="nav"
+onclick="showPage('leaks',this)">
+⚠️ Leak Detection
+</button>
+
+</div>
+
+
+<!-- MAIN CONTENT -->
+
+<div class="main">
+
+
+<!-- DASHBOARD -->
+
+<section id="dashboard" class="page active">
+
+<h2>📊 Dashboard</h2>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Total Connections</h3>
+
+<div class="number" id="connectionCount">
+4
+</div>
+
+<small>Active consumers</small>
+
+</div>
+
+
+<div class="card">
+
+<h3>Meter Readings</h3>
+
+<div class="number" id="readingCount">
+5
+</div>
+
+<small>Stored readings</small>
+
+</div>
+
+
+<div class="card">
+
+<h3>Pending Bills</h3>
+
+<div class="number">
+3
+</div>
+
+<small>Awaiting payment</small>
+
+</div>
+
+
+<div class="card">
+
+<h3>Open Complaints</h3>
+
+<div class="number" id="complaintCount">
+1
+</div>
+
+<small>Requires attention</small>
+
+</div>
+
+</div>
+
+
+<div class="table-box">
+
+<h3>Recent Meter Readings</h3>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Reading ID</th>
+<th>Connection</th>
+<th>Time</th>
+<th>Units</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>1</td>
+<td>1001</td>
+<td>01-Aug-2026 10:00</td>
+<td>25.50</td>
+<td>
+<span class="status active-status">
+Valid
+</span>
+</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>1001</td>
+<td>01-Aug-2026 11:00</td>
+<td>28.20</td>
+<td>
+<span class="status active-status">
+Valid
+</span>
+</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>1002</td>
+<td>01-Aug-2026 10:00</td>
+<td>18.40</td>
+<td>
+<span class="status active-status">
+Valid
+</span>
+</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>2001</td>
+<td>01-Aug-2026 10:00</td>
+<td>45.60</td>
+<td>
+<span class="status active-status">
+Valid
+</span>
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- CONNECTIONS -->
+
+<section id="connections" class="page">
+
+<h2>🔗 Connection Management</h2>
+
+<div class="form-box">
+
+<h3>Add New Connection</h3>
+
+<br>
+
+<div class="form-grid">
+
+<input
+id="connId"
+placeholder="Connection ID">
+
+<input
+id="consumerName"
+placeholder="Consumer Name">
+
+<select id="zone">
+
+<option>North Zone</option>
+<option>South Zone</option>
+<option>Central Zone</option>
+
+</select>
+
+<select id="connectionType">
+
+<option>Domestic</option>
+<option>Commercial</option>
+
+</select>
+
+</div>
+
+<br>
+
+<button
+class="primary-btn"
+onclick="addConnection()">
+
+➕ Add Connection
+
+</button>
+
+</div>
+
+
+<div class="table-box">
+
+<div class="search">
+
+<input
+id="connectionSearch"
+onkeyup="searchConnections()"
+placeholder="Search connection or consumer">
+
+</div>
+
+<table id="connectionTable">
+
+<thead>
+
+<tr>
+<th>Connection ID</th>
+<th>Consumer</th>
+<th>Zone</th>
+<th>Type</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>1001</td>
+<td>Ravi</td>
+<td>North Zone</td>
+<td>Domestic</td>
+<td>
+<span class="status active-status">
+Active
+</span>
+</td>
+</tr>
+
+<tr>
+<td>1002</td>
+<td>Priya</td>
+<td>North Zone</td>
+<td>Domestic</td>
+<td>
+<span class="status active-status">
+Active
+</span>
+</td>
+</tr>
+
+<tr>
+<td>2001</td>
+<td>Kumar</td>
+<td>South Zone</td>
+<td>Commercial</td>
+<td>
+<span class="status active-status">
+Active
+</span>
+</td>
+</tr>
+
+<tr>
+<td>3001</td>
+<td>Anitha</td>
+<td>Central Zone</td>
+<td>Domestic</td>
+<td>
+<span class="status active-status">
+Active
+</span>
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- METER READINGS -->
+
+<section id="readings" class="page">
+
+<h2>💧 Meter Consumption Readings</h2>
+
+<div class="table-box">
+
+<div class="search">
+
+<input
+id="readingSearch"
+placeholder="Enter connection ID"
+onkeyup="searchReadings()">
+
+</div>
+
+<table id="readingTable">
+
+<thead>
+
+<tr>
+<th>Reading ID</th>
+<th>Connection ID</th>
+<th>Meter ID</th>
+<th>Timestamp</th>
+<th>Consumption Units</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>1</td>
+<td>1001</td>
+<td>501</td>
+<td>01-Aug-2026 10:00</td>
+<td>25.50</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>1001</td>
+<td>501</td>
+<td>01-Aug-2026 11:00</td>
+<td>28.20</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>1002</td>
+<td>502</td>
+<td>01-Aug-2026 10:00</td>
+<td>18.40</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>2001</td>
+<td>503</td>
+<td>01-Aug-2026 10:00</td>
+<td>45.60</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>3001</td>
+<td>504</td>
+<td>01-Aug-2026 10:00</td>
+<td>22.30</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- BILLS -->
+
+<section id="bills" class="page">
+
+<h2>🧾 Billing Management</h2>
+
+<div class="table-box">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Bill ID</th>
+<th>Connection ID</th>
+<th>Month</th>
+<th>Amount</th>
+<th>Due Date</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>101</td>
+<td>1001</td>
+<td>August 2026</td>
+<td>₹850</td>
+<td>15-Aug-2026</td>
+<td>
+<span class="status pending">
+Pending
+</span>
+</td>
+</tr>
+
+<tr>
+<td>102</td>
+<td>1002</td>
+<td>August 2026</td>
+<td>₹620</td>
+<td>15-Aug-2026</td>
+<td>
+<span class="status paid">
+Paid
+</span>
+</td>
+</tr>
+
+<tr>
+<td>103</td>
+<td>2001</td>
+<td>August 2026</td>
+<td>₹1500</td>
+<td>15-Aug-2026</td>
+<td>
+<span class="status pending">
+Pending
+</span>
+</td>
+</tr>
+
+<tr>
+<td>104</td>
+<td>3001</td>
+<td>August 2026</td>
+<td>₹730</td>
+<td>15-Aug-2026</td>
+<td>
+<span class="status pending">
+Pending
+</span>
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- PAYMENTS -->
+
+<section id="payments" class="page">
+
+<h2>💳 Payment Management</h2>
+
+<div class="form-box">
+
+<h3>Record Payment</h3>
+
+<br>
+
+<div class="form-grid">
+
+<input
+id="paymentBill"
+placeholder="Bill ID">
+
+<input
+id="paymentAmount"
+type="number"
+placeholder="Amount">
+
+<select id="paymentMode">
+
+<option>UPI</option>
+<option>Card</option>
+<option>Cash</option>
+<option>Net Banking</option>
+
+</select>
+
+</div>
+
+<br>
+
+<button
+class="primary-btn"
+onclick="recordPayment()">
+
+💰 Record Payment
+
+</button>
+
+</div>
+
+
+<div class="table-box">
+
+<table id="paymentTable">
+
+<thead>
+
+<tr>
+<th>Payment ID</th>
+<th>Bill ID</th>
+<th>Amount</th>
+<th>Mode</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>1</td>
+<td>101</td>
+<td>₹500</td>
+<td>UPI</td>
+<td>
+<span class="status paid">
+Success
+</span>
+</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>102</td>
+<td>₹620</td>
+<td>Card</td>
+<td>
+<span class="status paid">
+Success
+</span>
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- COMPLAINTS -->
+
+<section id="complaints" class="page">
+
+<h2>📢 Complaint Management</h2>
+
+<div class="form-box">
+
+<h3>Register Complaint</h3>
+
+<br>
+
+<div class="form-grid">
+
+<input
+id="complaintConnection"
+placeholder="Connection ID">
+
+<select id="complaintType">
+
+<option>Leakage</option>
+<option>Meter Fault</option>
+<option>Billing Dispute</option>
+<option>Low Water Supply</option>
+
+</select>
+
+<textarea
+id="complaintDescription"
+placeholder="Complaint description"></textarea>
+
+</div>
+
+<br>
+
+<button
+class="primary-btn"
+onclick="addComplaint()">
+
+📢 Register Complaint
+
+</button>
+
+</div>
+
+
+<div class="table-box">
+
+<table id="complaintTable">
+
+<thead>
+
+<tr>
+<th>Complaint ID</th>
+<th>Connection</th>
+<th>Type</th>
+<th>Description</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+<td>1</td>
+<td>1001</td>
+<td>Leakage</td>
+<td>Possible pipeline leakage</td>
+<td>
+<span class="status open">
+Open
+</span>
+</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>2001</td>
+<td>Meter Fault</td>
+<td>Meter reading abnormal</td>
+<td>
+<span class="status resolved">
+Resolved
+</span>
+</td>
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+<!-- LEAK DETECTION -->
+
+<section id="leaks" class="page">
+
+<h2>⚠️ Leak Detection</h2>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Threshold</h3>
+
+<div class="number">
+30
+</div>
+
+<small>
+Units per reading
+</small>
+
+</div>
+
+
+<div class="card">
+
+<h3>High Consumption Records</h3>
+
+<div class="number">
+1
+</div>
+
+<small>
+Potential leakage
+</small>
+
+</div>
+
+</div>
+
+
+<!-- PROPERLY ALIGNED ALERT -->
+
+<div class="alert-box">
+
+<div class="alert-title">
+⚠ High Consumption Detected
+</div>
+
+<div class="alert-details">
+
+<div class="detail-row">
+<span class="detail-label">
+Connection ID
+</span>
+
+<span class="detail-value">
+2001
+</span>
+</div>
+
+
+<div class="detail-row">
+<span class="detail-label">
+Meter ID
+</span>
+
+<span class="detail-value">
+503
+</span>
+</div>
+
+
+<div class="detail-row">
+<span class="detail-label">
+Consumption
+</span>
+
+<span class="detail-value">
+45.60 units
+</span>
+</div>
+
+
+<div class="detail-row">
+<span class="detail-label">
+Timestamp
+</span>
+
+<span class="detail-value">
+01-Aug-2026 10:00
+</span>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+</div>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+Smart Water Utility Consumption, Billing and Complaint Management System
+
+</footer>
+
+
+<script>
+
+/* PAGE NAVIGATION */
+
+function showPage(pageId,btn){
+
+    let pages=document.querySelectorAll(".page");
+
+    pages.forEach(function(page){
+
+        page.classList.remove("active");
+
+    });
+
+
+    document
+    .getElementById(pageId)
+    .classList.add("active");
+
+
+    let buttons=document.querySelectorAll(".nav");
+
+    buttons.forEach(function(button){
+
+        button.classList.remove("active");
+
+    });
+
+
+    btn.classList.add("active");
+
+}
+
+
+/* SEARCH CONNECTIONS */
+
+function searchConnections(){
+
+    let input=
+    document
+    .getElementById("connectionSearch")
+    .value
+    .toLowerCase();
+
+
+    let rows=
+    document
+    .querySelectorAll("#connectionTable tbody tr");
+
+
+    rows.forEach(function(row){
+
+        row.style.display=
+        row.innerText
+        .toLowerCase()
+        .includes(input)
+        ? ""
+        : "none";
+
+    });
+
+}
+
+
+/* SEARCH METER READINGS */
+
+function searchReadings(){
+
+    let input=
+    document
+    .getElementById("readingSearch")
+    .value
+    .toLowerCase();
+
+
+    let rows=
+    document
+    .querySelectorAll("#readingTable tbody tr");
+
+
+    rows.forEach(function(row){
+
+        row.style.display=
+        row.innerText
+        .toLowerCase()
+        .includes(input)
+        ? ""
+        : "none";
+
+    });
+
+}
+
+
+/* ADD CONNECTION */
+
+function addConnection(){
+
+    let id=
+    document
+    .getElementById("connId")
+    .value;
+
+
+    let name=
+    document
+    .getElementById("consumerName")
+    .value;
+
+
+    let zone=
+    document
+    .getElementById("zone")
+    .value;
+
+
+    let type=
+    document
+    .getElementById("connectionType")
+    .value;
+
+
+    if(id=="" || name==""){
+
+        alert(
+        "Please enter Connection ID and Consumer Name"
+        );
+
+        return;
+
+    }
+
+
+    let table=
+    document
+    .getElementById("connectionTable")
+    .getElementsByTagName("tbody")[0];
+
+
+    let row=
+    table.insertRow();
+
+
+    row.innerHTML=
+
+    "<td>"+id+"</td>"+
+    "<td>"+name+"</td>"+
+    "<td>"+zone+"</td>"+
+    "<td>"+type+"</td>"+
+    "<td><span class='status active-status'>Active</span></td>";
+
+
+    document
+    .getElementById("connectionCount")
+    .innerText=
+    table.rows.length;
+
+
+    alert(
+    "Connection added successfully"
+    );
+
+}
+
+
+/* PAYMENT */
+
+let paymentId=3;
+
+
+function recordPayment(){
+
+    let bill=
+    document
+    .getElementById("paymentBill")
+    .value;
+
+
+    let amount=
+    document
+    .getElementById("paymentAmount")
+    .value;
+
+
+    let mode=
+    document
+    .getElementById("paymentMode")
+    .value;
+
+
+    if(bill=="" || amount==""){
+
+        alert(
+        "Please enter Bill ID and payment amount"
+        );
+
+        return;
+
+    }
+
+
+    let table=
+    document
+    .getElementById("paymentTable")
+    .getElementsByTagName("tbody")[0];
+
+
+    let row=
+    table.insertRow();
+
+
+    row.innerHTML=
+
+    "<td>"+paymentId+"</td>"+
+    "<td>"+bill+"</td>"+
+    "<td>₹"+amount+"</td>"+
+    "<td>"+mode+"</td>"+
+    "<td><span class='status paid'>Success</span></td>";
+
+
+    paymentId++;
+
+
+    alert(
+    "Payment recorded successfully"
+    );
+
+}
+
+
+/* COMPLAINT */
+
+let complaintId=3;
+
+
+function addComplaint(){
+
+    let connection=
+    document
+    .getElementById("complaintConnection")
+    .value;
+
+
+    let type=
+    document
+    .getElementById("complaintType")
+    .value;
+
+
+    let description=
+    document
+    .getElementById("complaintDescription")
+    .value;
+
+
+    if(connection=="" || description==""){
+
+        alert(
+        "Please enter complaint details"
+        );
+
+        return;
+
+    }
+
+
+    let table=
+    document
+    .getElementById("complaintTable")
+    .getElementsByTagName("tbody")[0];
+
+
+    let row=
+    table.insertRow();
+
+
+    row.innerHTML=
+
+    "<td>"+complaintId+"</td>"+
+    "<td>"+connection+"</td>"+
+    "<td>"+type+"</td>"+
+    "<td>"+description+"</td>"+
+    "<td><span class='status open'>Open</span></td>";
+
+
+    complaintId++;
+
+
+    document
+    .getElementById("complaintCount")
+    .innerText=
+    table.rows.length - 1;
+
+
+    alert(
+    "Complaint registered successfully"
+    );
+
+}
+
+</script>
+
+</body>
+</html>
